@@ -18,7 +18,7 @@ namespace WpfApp1
     public partial class MainWindow : Window
     {
         bool isProcessing = false;
-        CancellationTokenSource cancellationToken = new CancellationTokenSource();
+        CancellationTokenSource? cancellationToken;
 
         public MainWindow()
         {
@@ -33,32 +33,38 @@ namespace WpfApp1
                 button.Content = "キャンセル";
 
                 cancellationToken = new CancellationTokenSource();
-                await Do(cancellationToken);
+                var result = await DoAsync(cancellationToken);
+                if (result)
+                {
+                    MessageBox.Show("処理完了");
+                }
+                else
+                {
+                    MessageBox.Show("キャンセル");
+                }
 
                 init();
             }
             else
             {
-                cancellationToken.Cancel();
+                cancellationToken?.Cancel();
             }
         }
 
-        private async Task Do(CancellationTokenSource cancellationToken)
+        private async Task<bool> DoAsync(CancellationTokenSource cancellationToken)
         {
             for (int i = 0; i < 10; i++)
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    MessageBox.Show("キャンセル");
-                    init();
-                    return;
+                    return false;
                 }
 
                 await Task.Delay(1000);
                 progressBar.Value = i + 1;
             }
 
-            MessageBox.Show("処理完了");
+            return true;
         }
 
         private void init()
