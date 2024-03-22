@@ -23,6 +23,8 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
+
+            TaskbarItemInfo = new System.Windows.Shell.TaskbarItemInfo();
         }
 
         private async void button_Click(object sender, RoutedEventArgs e)
@@ -32,6 +34,9 @@ namespace WpfApp1
                 isProcessing = true;
                 button.Content = "キャンセル";
 
+                TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
+                TaskbarItemInfo.ProgressValue = 0;
+
                 cancellationToken = new CancellationTokenSource();
                 var result = await DoAsync(cancellationToken);
                 if (result)
@@ -40,6 +45,8 @@ namespace WpfApp1
                 }
                 else
                 {
+                    TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Error;
+                    progressBar.Foreground = Brushes.Red;
                     MessageBox.Show("キャンセル");
                 }
 
@@ -61,7 +68,9 @@ namespace WpfApp1
                 }
 
                 await Task.Delay(1000);
+
                 progressBar.Value = i + 1;
+                TaskbarItemInfo.ProgressValue = 0.1 * (i + 1);
             }
 
             return true;
@@ -70,8 +79,11 @@ namespace WpfApp1
         private void init()
         {
             progressBar.Value = 0;
+            progressBar.Foreground = Brushes.LightGreen;
             isProcessing = false;
             button.Content = "実行";
+
+            TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
         }
     }
 }
