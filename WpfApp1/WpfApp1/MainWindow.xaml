@@ -16,6 +16,6 @@
                 Width="100"
                 Content="実行" Click="button_Click"/>
 
-        <ProgressBar x:Name="progressBar" Grid.Row="1" Width="200" Height="20"/>
+        <ProgressBar x:Name="progressBar" Grid.Row="1" Width="200" Height="20" Maximum="10" d:Value="3"/>
     </Grid>
 </Window>
