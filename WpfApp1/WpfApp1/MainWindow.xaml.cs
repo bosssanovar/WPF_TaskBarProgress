@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -17,7 +18,7 @@ namespace WpfApp1
     public partial class MainWindow : Window
     {
         bool isProcessing = false;
-        bool canceler = false;
+        CancellationTokenSource cancellationToken = new CancellationTokenSource();
 
         public MainWindow()
         {
@@ -31,37 +32,40 @@ namespace WpfApp1
                 isProcessing = true;
                 button.Content = "キャンセル";
 
-                await Do();
+                cancellationToken = new CancellationTokenSource();
+                await Do(cancellationToken);
 
-                isProcessing = false;
-                progressBar.Value = 0;
-                button.Content = "実行";
+                init();
             }
             else
             {
-                canceler = true;
-                button.Content = "実行";
+                cancellationToken.Cancel();
             }
         }
 
-        private async Task Do()
+        private async Task Do(CancellationTokenSource cancellationToken)
         {
-            for(int i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++)
             {
-                if (canceler)
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    progressBar.Value = 0;
-                    isProcessing = false;
-                    canceler = false;
                     MessageBox.Show("キャンセル");
+                    init();
                     return;
                 }
 
                 await Task.Delay(1000);
-                progressBar.Value = i+1;
+                progressBar.Value = i + 1;
             }
 
             MessageBox.Show("処理完了");
+        }
+
+        private void init()
+        {
+            progressBar.Value = 0;
+            isProcessing = false;
+            button.Content = "実行";
         }
     }
 }
